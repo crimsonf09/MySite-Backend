@@ -66,7 +66,6 @@ func GetAllProjects() ([]model.Project, error) {
 		}
 		projects = append(projects, project)
 	}
-
 	return projects, nil
 }
 
