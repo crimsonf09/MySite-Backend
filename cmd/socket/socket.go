@@ -9,34 +9,33 @@ import (
 
 var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool {
-		return true // allow all origins, use stricter checks in prod
+		// Allow all origins for development, restrict in production
+		return true
 	},
 }
 
-func StartSocketServer() {
-	http.HandleFunc("/ws", handleSocket)
-
-	log.Println("Socket server listening on :8081")
-	if err := http.ListenAndServe(":8081", nil); err != nil {
-		log.Fatalf("Socket server failed: %v", err)
-	}
-}
-
-func handleSocket(w http.ResponseWriter, r *http.Request) {
+func WebSocketHandler(w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		log.Println("WebSocket upgrade error:", err)
+		log.Printf("WebSocket upgrade error: %v", err)
 		return
 	}
 	defer conn.Close()
 
+	log.Println("Client connected")
+
 	for {
-		_, msg, err := conn.ReadMessage()
+		// Echo message
+		messageType, message, err := conn.ReadMessage()
 		if err != nil {
-			log.Println("Socket read error:", err)
+			log.Printf("Read error: %v", err)
 			break
 		}
-		log.Println("Received from socket:", string(msg))
-		conn.WriteMessage(websocket.TextMessage, []byte("pong"))
+		log.Printf("Received: %s", message)
+
+		if err := conn.WriteMessage(messageType, message); err != nil {
+			log.Printf("Write error: %v", err)
+			break
+		}
 	}
 }
