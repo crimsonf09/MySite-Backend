@@ -13,6 +13,7 @@ import (
 
 var ProjectCollection *mongo.Collection
 var ContactMessageCollection *mongo.Collection
+var ChatCollection *mongo.Collection
 
 func InitMongoDB() (*mongo.Client, error) {
 	host := os.Getenv("MONGODB_HOST")
