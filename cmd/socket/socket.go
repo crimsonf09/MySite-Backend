@@ -4,6 +4,8 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/crimsonf09/MySite-Backend/internal/controller"
+	"github.com/crimsonf09/MySite-Backend/internal/service"
 	"github.com/gorilla/websocket"
 )
 
@@ -25,17 +27,14 @@ func WebSocketHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println("Client connected")
 
 	for {
-		// Echo message
-		messageType, message, err := conn.ReadMessage()
+		var msg service.MessageInput
+		err := conn.ReadJSON(&msg)
 		if err != nil {
 			log.Printf("Read error: %v", err)
 			break
 		}
-		log.Printf("Received: %s", message)
 
-		if err := conn.WriteMessage(messageType, message); err != nil {
-			log.Printf("Write error: %v", err)
-			break
-		}
+		// Handle message (already handles sending response)
+		controller.MessageHandler(conn, msg)
 	}
 }

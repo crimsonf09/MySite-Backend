@@ -40,6 +40,7 @@ func InitMongoDB() (*mongo.Client, error) {
 	db := client.Database(dbName)
 	ContactMessageCollection = db.Collection("messages")
 	ProjectCollection = db.Collection("projects")
+	ChatCollection = db.Collection("chats")
 
 	log.Printf("MongoDB connected at %s, using database: %s", uri, dbName)
 	return client, nil
