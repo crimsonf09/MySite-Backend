@@ -9,26 +9,27 @@ import (
 )
 
 func MessageHandler(conn *websocket.Conn, msg service.MessageInput) {
+	// Add timestamp & IP
 	msg.TimeStamp = time.Now()
+	msg.IPAddress = "" // optional: extract from request
 
-	// IP Address not available directly through Gorilla WebSocket, leave blank or handle elsewhere
-	msg.IPAddess = ""
-
-	// Save to DB
-	if _, err := service.GotNewMessage(msg); err != nil {
+	// Save user message & get bot response
+	savedUserMsg, botMsg, err := service.GotNewMessage(msg)
+	if err != nil {
 		log.Printf("Error saving message: %v", err)
 		conn.WriteJSON(map[string]string{"error": "Failed to save message"})
 		return
 	}
 
-	// Broadcast or process message
-	processedMsg, err := service.GotNewMessage(msg)
-	if err != nil {
-		log.Printf("Error processing message: %v", err)
-		conn.WriteJSON(map[string]string{"error": "Failed to process message"})
+	// Send user message back to client
+	if err := conn.WriteJSON(savedUserMsg); err != nil {
+		log.Printf("Error sending user message: %v", err)
 		return
 	}
 
-	// Send processed message back to client
-	conn.WriteJSON(processedMsg)
+	// Send bot message back to client
+	if err := conn.WriteJSON(botMsg.Message); err != nil {
+		log.Printf("Error sending bot message: %v", err)
+		return
+	}
 }

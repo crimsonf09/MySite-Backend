@@ -36,5 +36,6 @@ func WebSocketHandler(w http.ResponseWriter, r *http.Request) {
 
 		// Handle message (already handles sending response)
 		controller.MessageHandler(conn, msg)
+
 	}
 }
